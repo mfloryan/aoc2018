@@ -35,9 +35,37 @@ function fillFabric(fabric, elf) {
     }
 }
 
-//console.log(coords.map(parseCoords));
+let overlapIds = [];
 
-input.map(parseCoords).forEach(c => fillFabric(fabric, c));
+function addIfNotExists(id) {
+    if (!overlapIds.includes(id)) {
+        overlapIds.push(id);
+    }
+}
+
+function markFabric(fabric, elf) {
+    for (let i = 0; i < elf.w; i++) {
+        if (!fabric[elf.x+i]) fabric[elf.x+i] = [];
+        for (let j=0; j < elf.h; j++) {
+            const element = fabric[elf.x+i][elf.y+j];
+            if (!element) {
+                fabric[elf.x+i][elf.y+j] = elf.index;
+            } else {
+                if (element != 'X') {
+                    addIfNotExists(element);
+                }
+                addIfNotExists(elf.index);
+                fabric[elf.x+i][elf.y+j] = 'X';
+            }
+        }
+    }
+}
+
+input.map(parseCoords).forEach(c => markFabric(fabric, c));
+
+// console.log(overlapIds);
+
+console.log(input.map(parseCoords).map(x => x.index).filter(x => !overlapIds.includes(x)));
 
 // console.log(fabric);
 
@@ -52,5 +80,3 @@ function countOverlaps(fabric) {
     }
     return count;
 }
-
-console.log(countOverlaps(fabric));
