@@ -58,10 +58,9 @@ parsedLog.forEach(e => {
 
 console.log(agg);
 
-let hour = Array(60).fill(0);
-
 sleepyGuard = parsedLog.filter(e => e.guardId == "#523");
 
+let hour = Array(60).fill(0);
 startTime = '';
 sleepyGuard.forEach(e => {
     if (e.message == 'falls asleep') {
@@ -78,3 +77,18 @@ sleepyGuard.forEach(e => {
 // hour.forEach((v,i) => console.log(`${i}: ${v}`));
 
 console.log(hour.indexOf(Math.max(...hour)));
+
+
+let matrix = {};
+startTime = '';
+parsedLog.forEach(e => {
+    if (e.message == 'falls asleep') {
+        startTime = e.min;
+    }
+    if (e.message == 'wakes up') {
+        if (!matrix[e.guardId]) matrix[e.guardId] = Array(60).fill(0);
+        for (let i = startTime; i < e.min; i++) {
+            matrix[e.guardId][i]++;
+        }
+    }
+});
