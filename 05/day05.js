@@ -40,8 +40,19 @@ function reactAll(polymer) {
 }
 
 
-let finalPolymer = reactAll(polymer);
-console.log(finalPolymer.length);
-
 let finalPolymer2 = reactAll(input[0]);
 console.log(finalPolymer2.length);
+
+let i2 = input[0];
+let chemicals = new Set(i2.toUpperCase().split(""));
+
+let min = [];
+
+chemicals.forEach(c => {
+    console.log(c);
+    let newP = i2.split("").filter(x => x.toUpperCase() != c).join("");
+    min.push([c,reactAll(newP).length])
+
+});
+
+console.log(min.sort((a,b) => a[1] - b[1])[0][1]);
