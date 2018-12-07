@@ -17,38 +17,99 @@ steps = input;
 
 let edges = steps.map(s => { let parts = s.split(" "); return [parts[1], parts[7]]});
 
-console.log(edges);
 
-let graph = {};
-
-edges.forEach(n => {
-    if (!graph[n[0]]) {
-        graph[n[0]] = [n[1]]
-    } else {
-        graph[n[0]].push(n[1])
+class Graph {
+    constructor(edges) {
+        this.g = {};
+        
+        edges.forEach(n => {
+            if (!this.g[n[0]]) {
+                this.g[n[0]] = [n[1]];
+            } else {
+                this.g[n[0]].push(n[1]);
+            }
+        });
     }
-});
 
-let answer = '';
+    get graph() {
+        return this.g;
+    }
+
+    getNext() {
+        let nodes = Object.keys(this.g);
+        if (nodes.length == 0) return undefined;
+        
+        let nextNodes = new Set(Object.keys(this.g).map(k => this.graph[k]).flatMap(_ => _));
+        let firstNode = nodes.filter(n => !nextNodes.has(n)).sort();
+        return firstNode;
+    }
+
+    remove(node) {
+        if (Object.keys(this.g).length == 1) this.g[node].forEach(n => this.g[n] = []);
+        delete this.g[node];
+    }
+}
+
+function duration(node) {
+    return node.charCodeAt(0)-4;
+}
+
+let g = new Graph(edges);
+
+console.log(g.graph);
+
+let workers = 5;
+
+let time = 0;
+let done = false;
+
+let work = [];
 
 do {
+    work.forEach(w => w.d--);
 
-    let nodes = Object.keys(graph);
-    let nextNodes = new Set(Object.keys(graph).map(k => graph[k]).flatMap(_ => _));
-    let firstNode = nodes.filter(n => !nextNodes.has(n)).sort();
+    work.filter(w => w.d == 0).forEach(w => { g.remove(w.n); });
+    work = work.filter(w => w.d != 0);
 
-    console.log(graph);
+    if (work.length < workers) {
+        let newTask = g.getNext();
+        if (newTask) {
+            let newTasksNotInProgress = newTask.filter(t => !work.map(w => w.n).includes(t));
+            while (work.length < workers && newTasksNotInProgress.length > 0) {
+                let task = newTasksNotInProgress.shift();
+                work.push({n: task, d: duration(task)});
+            }
+        }
+    }
 
-    answer += firstNode[0];
-    if (nodes.length == 1) answer+= graph[firstNode[0]].join("");
-    delete graph[firstNode[0]];
+    console.log(work);
 
-    console.log(graph);
-    console.log('-');
+    if (work.length == 0) done = true;
+    time++;
+} while (!done);
 
-} while (Object.keys(graph).length>0);
+console.log(time);
 
 
-console.log(answer);
+// let answer = '';
+
+// do {
+
+//     let nodes = Object.keys(graph);
+//     let nextNodes = new Set(Object.keys(graph).map(k => graph[k]).flatMap(_ => _));
+//     let firstNode = nodes.filter(n => !nextNodes.has(n)).sort();
+
+//     console.log(graph);
+
+//     answer += firstNode[0];
+//     if (nodes.length == 1) answer+= graph[firstNode[0]].join("");
+//     delete graph[firstNode[0]];
+
+//     console.log(graph);
+//     console.log('-');
+
+// } while (Object.keys(graph).length>0);
+
+// console.log(answer);
 
 
