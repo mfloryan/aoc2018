@@ -13,30 +13,18 @@ let coords = [
     [8, 9],
 ]
 
-//find coordinates that are not intifine
-
-
 coords = inputCoords;
 
-let maxArea = [];
-
-maxArea = {
+let maxArea = {
     l: coords.reduce((a,c) => Math.min(c[0],a),Infinity),
     t: coords.reduce((a,c) => Math.min(c[1],a),Infinity),
     r:coords.reduce((a,c) => Math.max(c[0],a),0),
     b:coords.reduce((a,c) => Math.max(c[1],a),0),
 };
 
-console.log(maxArea);
-
-let middleCoords = coords.filter( c => !(c[0] == maxArea.l || c[0] == maxArea.r || c[1] == maxArea.t || c[1] == maxArea.b));
-
-console.log(middleCoords);
-
 function manhatanDistance(a,b) {
     return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
 }
-
 
 let distances = [];
 
@@ -51,9 +39,22 @@ for (let col = maxArea.l; col <= maxArea.r; col++) {
     }
 }
 
-console.log(
-distances.reduce( (p,c) => {
-     if (p[c]) p[c]++; else p[c]=1;
-     return p; 
-    },{})
+let areaByCoordinate = distances.reduce( (p,c) => {
+    if (p[c]) p[c]++; else p[c]=1;
+    return p;
+   },{});
+
+console.log('Part one: ' +
+    Object.entries(areaByCoordinate).sort((a,b) => a[1]-b[1]).pop()[1]
 );
+
+let regionSize = 0;
+const maxRegionDistance = 10000;
+
+for (let row = maxArea.t; row <= maxArea.b; row++) {
+    for (let col = maxArea.l; col <= maxArea.r; col++) {
+        let totalDistance = coords.map(c => manhatanDistance([col, row],c)).reduce((p,c) => p+c);
+        if (totalDistance < maxRegionDistance) regionSize++;
+    }
+}
+console.log('Part two: ' + regionSize);
