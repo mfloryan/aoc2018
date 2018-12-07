@@ -4,8 +4,6 @@ let input = fs.readFileSync('input.txt', {encoding: 'utf8'}).split("\n").sort();
 
 let polymer = "dabAcCaCBAcCcaDA";
 
-
-
 function doReact(a,b) {
     if (a == b) return false;
     if (a.toUpperCase() == b || b.toUpperCase() ==a) return true;
