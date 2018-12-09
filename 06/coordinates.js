@@ -22,7 +22,7 @@ let maxArea = {
     b:coords.reduce((a,c) => Math.max(c[1],a),0),
 };
 
-function manhatanDistance(a,b) {
+function manhattanDistance(a,b) {
     return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
 }
 
@@ -32,7 +32,7 @@ for (let col = maxArea.l; col <= maxArea.r; col++) {
     for (let row = maxArea.t; row <= maxArea.b; row++) {
 
         let closest = coords
-            .map((c,i) => {return {i:i, d:manhatanDistance(c,[col,row])};})
+            .map((c,i) => {return {i:i, d:manhattanDistance(c,[col,row])};})
             .sort((a,b) => a.d - b.d);
 
         distances.push((closest[0].d == closest[1].d)?'.':closest[0].i);
@@ -53,7 +53,7 @@ const maxRegionDistance = 10000;
 
 for (let row = maxArea.t; row <= maxArea.b; row++) {
     for (let col = maxArea.l; col <= maxArea.r; col++) {
-        let totalDistance = coords.map(c => manhatanDistance([col, row],c)).reduce((p,c) => p+c);
+        let totalDistance = coords.map(c => manhattanDistance([col, row],c)).reduce((p,c) => p+c);
         if (totalDistance < maxRegionDistance) regionSize++;
     }
 }

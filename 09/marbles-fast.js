@@ -5,7 +5,7 @@ class Ring {
         this.current = undefined;
     }
 
-    addNextToCurrent(value) {
+    insertToTheRight(value) {
         let n = {value: value};
         if (!this.current) {
             n.left = n;
@@ -39,24 +39,13 @@ class Ring {
         return value;
     }
 
-    show() {
+    display() {
         let ring = [];
         let start = this.current;
         let next = start;
         do {
             ring.push(next.value);
             next = next.right;
-        } while (next !== start)
-        console.log(ring.join(" "));
-    }
-
-    showRight() {
-        let ring = [];
-        let start = this.current;
-        let next = start;
-        do {
-            ring.push(next.value);
-            next = next.left;
         } while (next !== start)
         console.log(ring.join(" "));
     }
@@ -67,7 +56,7 @@ function playTheGame(numberOfElfs, lastMarble) {
     let elfScores = new Array(numberOfElfs).fill(0);
 
     let r = new Ring();
-    r.addNextToCurrent(0);
+    r.insertToTheRight(0);
 
     for (let i=1; i <= lastMarble; i++) {
         let currentElf = (i%numberOfElfs);
@@ -78,7 +67,7 @@ function playTheGame(numberOfElfs, lastMarble) {
             elfScores[currentElf] += r.removeCurrent();
         } else {
             r.moveRight(1);
-            r.addNextToCurrent(i);
+            r.insertToTheRight(i);
         }
     }
     return elfScores.reduce((a,c) => Math.max(a,c),0)
