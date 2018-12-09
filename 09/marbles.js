@@ -1,5 +1,3 @@
-
-
 let input = "439 players; last marble is worth 71307 points";
 
 function playTheGame(numberOfElfs, lastMarble) {
@@ -9,7 +7,15 @@ function playTheGame(numberOfElfs, lastMarble) {
 
     let currentMarblePosition = 0;
 
+    console.log(lastMarble);
+    let start = Date.now();
+    let percent = 0;
+
     for (let i=1; i <= lastMarble; i++) {
+        if (i%(lastMarble/100) == 0) {
+            console.log(`${percent++}% time: ${Date.now() - start} ms \t i: ${i}`);
+            start = Date.now();
+        }
         let currentElf = (i%numberOfElfs);
 
         if (i % 23 == 0) {
@@ -36,3 +42,5 @@ function playTheGame(numberOfElfs, lastMarble) {
 
 console.log("Part 1:");
 console.log(playTheGame(439,71307));
+console.log("Part 2:");
+console.log(playTheGame(439,100*71307));
