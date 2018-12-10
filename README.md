@@ -1,5 +1,11 @@
-# Advent of Code 2018
+# Advent of Code
 
-You know 🎄and coding together, every morning. Mostly to see if I can still do it.
+## 2017
 
-Find all the nice things here: https://adventofcode.com/2018
+Didn't do much...
+
+## 2018
+
+See inside `2018/`
+
+Find all the nice things here: https://adventofcode.com/
