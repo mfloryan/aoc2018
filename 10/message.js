@@ -53,7 +53,6 @@ function boundingBox(skyMap) {
 }
 
 function paintTheSky(skyMap, boundingBox) {
-
     for (let x = boundingBox.t; x <= boundingBox.b; x++) {
         let r = [];
         for (let y = boundingBox.l; y <= boundingBox.r; y++) {
@@ -69,13 +68,11 @@ function paintTheSky(skyMap, boundingBox) {
 
 let skyMap = input.map(parseInput);
 
+let bb = boundingBox(skyMap);
+let previousArea = Math.abs(bb.r-bb.l) * Math.abs(bb.b - bb.t);
+
 let aligned = false;
 let time = 0;
-
-// paintTheSky(skyMap, boundingBox(skyMap));
-
-let bb=boundingBox(skyMap);
-let previousArea = Math.abs(bb.r-bb.l) * Math.abs(bb.b - bb.t);
 
 do {
     time++;
@@ -87,17 +84,16 @@ do {
 
     let box = boundingBox(skyMap);
     let area = Math.abs(box.r-box.l) * Math.abs(box.b - box.t);
+
     if (area < previousArea) {
-        
         previousArea = area;
     } else {
         aligned = true;
     }
-    // console.log(`${time}: ${area}`);
 
 } while (!aligned)
 
-console.log(time - 1);
+console.log("Part two: " +  (time - 1));
 
 skyMap = input.map(parseInput);
 for (let i = 0; i < time - 1; i++) {
@@ -107,6 +103,5 @@ for (let i = 0; i < time - 1; i++) {
     });
 }
 
-console.log(boundingBox(skyMap));
-
+console.log("Part one:");
 paintTheSky(skyMap, boundingBox(skyMap));
