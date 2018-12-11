@@ -27,7 +27,6 @@ function calculateCircularCaptcha(input) {
     return sum;
 }
 
-
 let examples2 = ["1212","1221","123425","123123","12131415"].map(x=> x.split("").map(_ => parseInt(_)));
 
 console.log(examples2.map(calculateCircularCaptcha));
