@@ -24,26 +24,24 @@ function getNextState(currentState, rules) {
     let newState = [];
     for (let i = -2; i < currentState.length + 2; i++) {
         let neighbours = "";
-        let currentIndex;
-        if (i < 2 || i - 1 > currentState.length) {
-            neighbours += ".";
-        }
-        else { 
-            neighbours += currentState[i-2][1];
-        }
-        if (i < 1 || i > currentState.length) neighbours += "."; else neighbours += currentState[i-1][1];
+        if (i < 2 || i - 1 > currentState.length)   neighbours += "."; else neighbours += currentState[i-2][1];
+        if (i < 1 || i > currentState.length)       neighbours += "."; else neighbours += currentState[i-1][1];
         if (i < 0 || (i + 1 > currentState.length)) neighbours += "."; else neighbours += currentState[i][1];
-        if (i < -1 || i + 2 > currentState.length) neighbours += "."; else neighbours += currentState[i+1][1];
-        if (i < -2 || i + 3 > currentState.length) neighbours += "."; else neighbours += currentState[i+2][1];
+        if (i < -1 || i + 2 > currentState.length)  neighbours += "."; else neighbours += currentState[i+1][1];
+        if (i < -2 || i + 3 > currentState.length)  neighbours += "."; else neighbours += currentState[i+2][1];
 
-        if (i < 0 || i > currentState.length-1) currentIndex = i + currentState[0][0]; else {
+        let currentIndex;
+        if (i < 0 || i > currentState.length-1) 
+            currentIndex = i + currentState[0][0]; 
+        else
              currentIndex = currentState[i][0];
-        }
 
         let matchingRule = rules.find(r => r[0] == neighbours);
-        if (matchingRule) newState.push([currentIndex, matchingRule[1]]);
-        else newState.push([currentIndex, "."]);
         
+        if (matchingRule)
+            newState.push([currentIndex, matchingRule[1]]);
+        else 
+            newState.push([currentIndex, "."]);
     }
     return newState;
 }
@@ -76,6 +74,7 @@ for (i = 0; i < 301; i++) {
 
 console.log(prevState);
 
+// It's a slider
 state.forEach( _ => {
     _[0] += (50000000000 - (i+1))
 });
