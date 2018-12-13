@@ -2,7 +2,7 @@
 
 ## 2017
 
-Didn't do much...
+See insite `2017/` for some attempts
 
 ## 2018
 
