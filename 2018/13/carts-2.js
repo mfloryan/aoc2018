@@ -18,10 +18,6 @@ const directionCycle = [
     { '>':'v', 'v':'<', '<':'^', '^':'>'}, //turn right
 ];
 
-const turns = [
-    {'-' : '<'}
-];
-
 function getCartsAndMap(snapshot) {
 
     let map = [];
@@ -116,19 +112,9 @@ function moveCarts(map, carts) {
 
 let [map, carts] = getCartsAndMap(input.map(r => r.split("")));
 
-console.log( map.map(x=>x.join("")).join("\n")  
+console.log(
+    map.map(x=>x.join("")).join("\n")  
 );
-
-function isCrash(carts) {
-    for (let i=0; i < carts.length; i++) {
-        for (let j=i+1; j< carts.length; j++) {
-            if (carts[i].r == carts[j].r && carts[i].c == carts[j].c) {
-                console.log(`X: ${carts[i].c},${carts[i].r}`);
-                return true;
-            }
-        }
-    }
-}
 
 function markCrash(carts) {
     for (let i=0; i < carts.length; i++) {
