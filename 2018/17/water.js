@@ -36,6 +36,15 @@ let input4 = [
     'y=13, x=496..505',
 ];
 
+let input5 = [
+    'x=498, y=3..5',
+    'x=504, y=3..5',
+    'y=5, x=498..504',
+    'x=496, y=11..13',
+    'x=506, y=10..13',
+    'y=13, x=496..506',
+];
+
 
 function parseInput(input) {
     let veins = [];
@@ -62,15 +71,15 @@ function drawMap(map, maxY = undefined) {
 
     let y = 0;
     map.forEach(r => {
-        row = ".";
+        row = "";
         r.forEach(c => {
-            row += (c[1] == ' ')?((c[0] == ' ')?'.':c[0]):c[1];
+            row += (c[1] == ' ')?((c[0] == ' ')?' ':c[0]):c[1];
         });
         if (maxY) {
             if (y < maxY) {
-                console.log(row + ".");
+                console.log(row);
             }
-        } else console.log(row + ".");
+        } else console.log(row);
         y++;
     });
 }
@@ -106,10 +115,6 @@ function fillWithWater(map, maxY, start, direction = 0, c = 0) {
 
     if (isWater(map, start)) {
         if (map[start.y][start.x][1] == "|") return true; else return false;
-//        return false;
-// /        // if (direction == "l" || direction == "r") return 0;
-        // if (direction == "d" && map[start.y][start.x][1] == "|") return 0; else
-        //  return -2;
     }
     
     // map[start.y][start.x][1] = "*";
@@ -123,10 +128,10 @@ function fillWithWater(map, maxY, start, direction = 0, c = 0) {
     let down = fillWithWater(map, maxY, {x: start.x, y: start.y + 1}, 0, c+1);
     if (down == true) return true;
 
-    let result = false;
-    result = (direction <= 0) && fillWithWater(map, maxY, {x: start.x - 1, y: start.y}, -1, c+1);
-    result = result || ((direction >= 0) && fillWithWater(map, maxY, {x: start.x + 1, y: start.y}, +1, c+1));
+    let r1 = (direction <= 0) && fillWithWater(map, maxY, {x: start.x - 1, y: start.y}, -1, c+1);
+    let r2 = (direction >= 0) && fillWithWater(map, maxY, {x: start.x + 1, y: start.y}, +1, c+1);
 
+    let result = r1 || r2;
     if (result) return true;
 
     if (direction == 0) {
@@ -134,15 +139,13 @@ function fillWithWater(map, maxY, start, direction = 0, c = 0) {
         fillItUp(map, {x: start.x + 1, y: start.y}, +1);
     }
 
-    // r2 = fillWithWater(map, maxY, {x: start.x + 1, y: start.y}, +1, c+1);
-
     return false;
 }
 function createBox(obstacles, boundaries) {
     let box = [];
-    for (let y = 0; y <= boundaries.maxY; y++) {
+    for (let y = boundaries.minY; y <= boundaries.maxY; y++) {
         let row = [];
-       for (let x = boundaries.minX-1; x <= boundaries.maxX+1; x++) {
+       for (let x = boundaries.minX; x <= boundaries.maxX; x++) {
             if (obstacles.some(p => p.x == x && p.y == y)) row.push(['#',' ']); else row.push([' ',' ']);
        }
        box.push(row);
@@ -156,29 +159,28 @@ function solveInput(input) {
     let boundaries = veins.reduce((a,c) => { return {
         minX: Math.min(c.x, a.minX),
         maxX: Math.max(c.x, a.maxX),
-        maxY: Math.max(c.y, a.maxY)}}, {minX: Infinity, maxX: -Infinity,  maxY:0});
+        minY: Math.min(c.y, a.minY),
+        maxY: Math.max(c.y, a.maxY)}}, {minX: Infinity, maxX: -Infinity,  minY: Infinity, maxY:0});
     
+    console.log(boundaries);
+
     let map = createBox(veins, boundaries);
-    map[0][500 - boundaries.minX + 1][0] = "+";
+
+    map[0][500 - boundaries.minX][0] = "+";
     
-    drawMap(map);
-    fillWithWater(map, boundaries.maxY, {x:500 - boundaries.minX + 1, y:0});
+    fillWithWater(map, boundaries.maxY - boundaries.minY, {x:500 - boundaries.minX, y:0});
+    // drawMap(map);
 
-    console.log("\n****\n");
-    drawMap(map);
-
-    let waterCount = map.flatMap(r => r.map(c => c[1]).filter(i => i != ' ')).length - 1;
-    console.log(waterCount);
-    return waterCount;
+    console.log(map.map(r=> r.flatMap(c => c[1]).filter(i => i != ' ').length).reduce((p,c) => p+c) );
+    // let waterCount = map.flatMap(r => r.map(c => c[1]).filter(i => i != ' ')).length;
+    // console.log(waterCount);
+    let dryWater = map.flatMap(r => r.map(c => c[1]).filter(i => i == '~')).length;
+    console.log(dryWater);
 }
 
 // console.log(solveInput(input2) == 57);
 // console.log(solveInput(input3));
 // console.log(solveInput(input4));
+// console.log(solveInput(input5));
 
 console.log(solveInput(input));
-
-
-// 72646 - too high
-// 68530
-// 21524 -- too low
