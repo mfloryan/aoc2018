@@ -87,46 +87,56 @@ function isWater(map, start) {
     return false;
 }
 
-function fillWithWater(map, maxY, start, direction = "", c = 0) {
+
+function fillItUp(map, point, dir) {
+    if (map[point.y][point.x][1] == "|") {
+        fillItUp(map, {x: point.x + dir, y: point.y}, dir);
+        map[point.y][point.x][1] = "~";
+    }
+} 
+
+function fillWithWater(map, maxY, start, direction = 0, c = 0) {
     if (start.y > maxY) {
-        return 1; //got to the end
+        return true; //got to the end
     }
+
     if (isWall(map, start)) {
-        return -1;
+        return false;
     }
+
     if (isWater(map, start)) {
-        if (direction == "d" && map[start.y][start.x][1] == "|") return 0; else
-         return -2;
+        if (map[start.y][start.x][1] == "|") return true; else return false;
+//        return false;
+// /        // if (direction == "l" || direction == "r") return 0;
+        // if (direction == "d" && map[start.y][start.x][1] == "|") return 0; else
+        //  return -2;
     }
+    
     // map[start.y][start.x][1] = "*";
 
-    // if (start.y == 415 || start.y == 416) {
-    //     drawMap(map, 460);
+    //     drawMap(map);
     //     console.log(c);
     //     console.log(start);
-    // }
-
-    map[start.y][start.x][1] = "*";
-    console.log(c);
-    drawMap(map);
-
-
 
     map[start.y][start.x][1] = "|";
 
-    let down = fillWithWater(map, maxY, {x: start.x, y: start.y + 1}, "d", c+1);
-    if (down == 1) return 1;
+    let down = fillWithWater(map, maxY, {x: start.x, y: start.y + 1}, 0, c+1);
+    if (down == true) return true;
 
-    if (down < 0) {
-        let r1 = fillWithWater(map, maxY, {x: start.x - 1, y: start.y}, "l", c+1);
-        if (r1 == -1) map[start.y][start.x][1] = "~";
+    let result = false;
+    result = (direction <= 0) && fillWithWater(map, maxY, {x: start.x - 1, y: start.y}, -1, c+1);
+    result = result || ((direction >= 0) && fillWithWater(map, maxY, {x: start.x + 1, y: start.y}, +1, c+1));
 
-        let r2 = fillWithWater(map, maxY, {x: start.x + 1, y: start.y}, "r", c+1);
-        if (r2 == -1) map[start.y][start.x][1] = "~";
+    if (result) return true;
 
-        return (r1 == 1 || r2 == 1)?"1":-1;
+    if (direction == 0) {
+        fillItUp(map, {x: start.x, y: start.y}, -1);
+        fillItUp(map, {x: start.x + 1, y: start.y}, +1);
     }
 
+    // r2 = fillWithWater(map, maxY, {x: start.x + 1, y: start.y}, +1, c+1);
+
+    return false;
 }
 function createBox(obstacles, boundaries) {
     let box = [];
@@ -163,13 +173,12 @@ function solveInput(input) {
 }
 
 // console.log(solveInput(input2) == 57);
-console.log(solveInput(input3));
+// console.log(solveInput(input3));
 // console.log(solveInput(input4));
 
-// console.log(solveInput(input));
+console.log(solveInput(input));
 
 
 // 72646 - too high
 // 68530
-// 201998
-// 132455 
+// 21524 -- too low
