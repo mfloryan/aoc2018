@@ -13,7 +13,7 @@ let input2 = [
 
 function parseArmy(name, input) {
     const lineRe = /(.+) units each with (.+) hit points (\(.*\) ){0,1}with an attack that does (.+) damage at initiative (.+)/;
-    let army = {name: name, groups: []};
+    let army = {name: name, boost: 0, groups: []};
     let line = input.shift();
     let i = 1;
     while (line && line != "") {
@@ -105,6 +105,7 @@ function targetSelection(attacker, defender) {
 }
 
 function fight(armies) {
+    let totalKilled = 0;
     let targets = targetSelection(armies[1], armies[0]);
     targets = targets.concat(...targetSelection(armies[0], armies[1]));
     targets.sort((a,b) => b.a.initative - a.a.initative);
@@ -112,34 +113,59 @@ function fight(armies) {
         if (t.a.units > 0) {
             let damage = calculateDamage(t.a, t.d);
             let killed = Math.min(Math.floor(damage / t.d.hp), t.d.units);
+            totalKilled += killed;
             t.d.units -= killed;
-            console.log(`${t.a.team} ${t.a.id} attacks defending group ${t.d.id}, killing ${killed} units`);
+            // console.log(`${t.a.team} ${t.a.id} attacks defending group ${t.d.id}, killing ${killed} units`);
         }
     });
+    // console.log(totalKilled);
+    if (totalKilled == 0) return false;
+    return true;
 }
 
-let setup = parseInput(input);
 
 function allFights(setup) {
     let areFighting = true;
-    let i = 0;
     do {
-        i++;
-    
-        setup.forEach(a => {
-            console.log(a.name);
-            a.groups.filter(g => g.units >0).forEach(g => {
-                console.log(`Group ${g.id} contains ${g.units} units`);
-            })
-        })
-        console.log();
-        fight(setup);
-        console.log();
-        if (i > 10) areFighting = false;
+        // setup.forEach(a => {
+        //     console.log(a.name);
+        //     a.groups.filter(g => g.units >0).forEach(g => {
+        //         console.log(`Group ${g.id} contains ${g.units} units`);
+        //     })
+        // })
+        // console.log();
+        if (fight(setup) == false) break;
+        // console.log();
         areFighting = setup.map(a => a.groups.filter(x => x.units > 0).length).filter(x => x > 0).length > 1;
     } while (areFighting)
     
-    return setup.flatMap(a => a.groups).reduce((a,c) => a + c.units, 0);
+    let winner = new Set(setup.flatMap(a => a.groups).filter(x => x.units > 0).map(u => u.team));
+
+    if (winner.size > 1) {
+        return {winner: "none"}
+    }
+    [a] = winner.values();
+
+    return {winner: a, units: setup.flatMap(a => a.groups).reduce((a,c) => a + c.units, 0)};
 }
 
-console.log(allFights(setup));
+
+
+let setup = parseInput(input.slice());
+let result = allFights(setup);
+console.log(`Part 1: ${result.units}`);
+
+
+let boost = 10;
+result = undefined;
+do {
+    let setup = parseInput(input.slice());
+    setup[0].groups.forEach(g => g.attack[0] += boost);
+    result = allFights(setup);
+    boost++;
+} while (result.winner != "Immune System:")
+
+
+console.log(`Boost: ${boost}`);
+console.log("Part 2:");
+console.log(result);
