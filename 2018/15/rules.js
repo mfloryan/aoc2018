@@ -23,9 +23,10 @@ let pointEquality = function(a) {
 }
 
 class Board {
-    constructor(walls, units) {
+    constructor(walls, units, hp = {'E': 3, 'G': 3}) {
         this._walls = walls;
         this._units = units;
+        this._hp = hp;
     }
 
     get walls() {
@@ -66,10 +67,8 @@ class Board {
     }
 
     moveUnit(unit) {
-
         if (!this.shouldUnitMove(unit)) return;
 
-        // console.log(`Moving: ${unit.type} from [${unit.x},${unit.y}]`);
         let targets = this.findTargets(unit.type);
         let destinations = this.getDestinations(targets);
 
@@ -88,10 +87,8 @@ class Board {
 
         if (destinations.length > 0) {
             let destination = destinations[0];
-            // console.log(`Moving towards: ${destination.x} - ${destination.y}`);
 
             let newLocation = this.findFirstStepTowards(destination, unit);
-            // console.log(`Next step: ${newLocation.x} - ${newLocation.y}`);
             unit.x = newLocation.x;
             unit.y = newLocation.y;
         }
@@ -106,16 +103,14 @@ class Board {
         let enemiesAround = enemies.filter(e => us.some(pointEquality(e)));
         if (enemiesAround.length > 0) {
             enemiesAround = enemiesAround.inReadingOrder().sort((a,b) => a.hp - b.hp);
-            enemiesAround[0].hp -= 3;
+            enemiesAround[0].hp -= this._hp[unit.type];
         }
         return true;
     }
 
     playRound() {
         let units = this.aliveUnits.inReadingOrder();
-        // console.log(units.map(u => `${u.type}[${u.x},${u.y}]`).join("-"));
 
-        // console.log(this.aliveUnits.inReadingOrder().map(u => `${u.type}(${u.hp})`).join("-"));
         for (let i = 0; i < units.length; i++) {
             let u = units[i];
             if (u.hp > 0) {
@@ -126,7 +121,6 @@ class Board {
                 }
             }
         }
-        // console.log(this.aliveUnits.inReadingOrder().map(u => `${u.type}(${u.hp})`).join("-"));
 
         return 0;
     }
@@ -184,7 +178,7 @@ class Board {
     }
 }
 
-exports.parseInput = function(input) {
+exports.parseInput = function(input, hp = undefined) {
     let walls = [];
     let units = [];
 
@@ -196,7 +190,7 @@ exports.parseInput = function(input) {
         }
     }
 
-   return new Board(walls, units);
+   return (hp? new Board(walls, units,hp) : new Board(walls, units, hp));
 }
 
 exports.Board = Board; 
@@ -204,17 +198,11 @@ exports.Board = Board;
 exports.playTheGame = function(cave) {
     let rounds = 0;
     let gameRuns = true;
-    let final = 0;
-    // console.log(cave.show());
     do {
         rounds++;
-        // console.log(rounds);
-        final = cave.playRound();
-        // console.log(cave.show());
-        // console.log();
-        gameRuns = (final == 0);
+        gameRuns = (cave.playRound() == 0);
     } while (gameRuns);
 
-    let outcome = cave.getTotalHitPoints() * (rounds - (final));
+    let outcome = cave.getTotalHitPoints() * (rounds - 1);
     return outcome;
 }

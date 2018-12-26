@@ -347,7 +347,7 @@ describe('Board', function() {
 
             assert.strictEqual(result, 13400);
         });
-        
+
         it('sample combat 47', function() {
 
             let input = [
@@ -504,6 +504,26 @@ describe('Board', function() {
             assert.strictEqual(result, 18740);
         });
 
+    });
+
+    describe('modified HP games', function() {
+        it('example one', function() {
+
+            let input = [
+                '#######',
+                '#.G...#',
+                '#...EG#',
+                '#.#.#G#',
+                '#..G#E#',
+                '#.....#',
+                '#######',
+            ];
+
+            let board = bb.parseInput(input, {E: 15, G: 3});
+            let result = bb.playTheGame(board);
+
+            assert.strictEqual(result, 4988);
+        });
     });
 
 });
