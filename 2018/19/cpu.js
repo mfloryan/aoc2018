@@ -54,7 +54,7 @@ function executeCode(input) {
     });
 
     let execute = true;
-    cpu.registers[0] = 1;
+    // cpu.registers[0] = 1;
     console.log(cpu.registers);
 
     // cpu.setRegisters([277, 10551309, 10, 789408, 0, 200]);
@@ -81,13 +81,3 @@ function executeCode(input) {
 }
 
 executeCode(input);
-
-
-//p2 - 8 - nope
-//p2 - 4 - nope
-//p2 - 5 - nope
-//p2 - ??
-
-
-//10000000 => 4|10551309| 5|10518570|0|25
-//11000000 => 4|10551309|10|   92261|0|26
