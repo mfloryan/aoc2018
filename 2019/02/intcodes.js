@@ -1,7 +1,4 @@
 const assert = require('assert');
-const fs = require('fs');
-// const input = fs.readFileSync('input.txt', { encoding: 'utf8' });
-
 console.log('Day 02');
 
 const sampleCode = [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
@@ -15,11 +12,10 @@ function RunCode (initialCode) {
 
   do {
     const opcode = code[position];
-    // console.log(opcode);
-    if (opcode == 99) run = false;
-    else if (opcode == 1) {
+    if (opcode === 99) run = false;
+    else if (opcode === 1) {
       code[code[position + 3]] = code[code[position + 1]] + code[code[position + 2]];
-    } else if (opcode == 2) {
+    } else if (opcode === 2) {
       code[code[position + 3]] = code[code[position + 1]] * code[code[position + 2]];
     }
     position += 4;
@@ -28,21 +24,21 @@ function RunCode (initialCode) {
   return code[0];
 }
 
-console.log(RunCode(sampleCode));
+assert.strictEqual(RunCode(sampleCode), 3500);
 
 const c2 = [1, 0, 0, 0, 99];
-
-console.log(RunCode(c2));
+assert.strictEqual(RunCode(c2), 2);
 
 const c3 = [2, 3, 0, 3, 99];
-console.log(RunCode(c3));
+assert.strictEqual(RunCode(c3), 2);
 
 const c4 = [2, 4, 4, 5, 99, 0];
-console.log(RunCode(c4));
+assert.strictEqual(RunCode(c4), 2);
 
 codePartOne[1] = 12;
 codePartOne[2] = 2;
 console.log(RunCode(codePartOne));
+
 
 for (let noun = 0; noun < 100; noun++) {
   for (let verb = 0; verb < 100; verb++) {
@@ -50,7 +46,7 @@ for (let noun = 0; noun < 100; noun++) {
     codePartOne[2] = verb;
     const output = RunCode(codePartOne);
     // console.log(`${noun},${verb},${output}`);
-    if (output == 19690720) {
+    if (output === 19690720) {
       console.log(100 * noun + verb);
       break;
     }
