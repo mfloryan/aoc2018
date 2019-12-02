@@ -1,0 +1,28 @@
+{
+  "name": "aoc2018",
+  "version": "1.0.0",
+  "description": "Advent of Code 2018",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mfloryan/aoc2018.git"
+  },
+  "keywords": [
+    "aoc2018"
+  ],
+  "author": "Marcin Floryan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mfloryan/aoc2018/issues"
+  },
+  "homepage": "https://github.com/mfloryan/aoc2018#readme",
+  "dependencies": {
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0"
+  }
+}
