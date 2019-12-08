@@ -6,7 +6,7 @@ console.log('Day 06');
 const input = fs.readFileSync(__dirname + '/input.txt', { encoding: 'utf8' });
 const inputOrbits = input.split('\n');
 
-let sampleOrbits =
+const sampleOrbits =
 `COM)B
 B)C
 C)D
@@ -29,10 +29,10 @@ function insertIntoTree (tree, parent, leaf, l = 0) {
     return true;
   } else if (tree.n === leaf) {
     // console.log(`Found at ${tree.n}: ${parent})${leaf}`);
-    let tempN = tree.n;
-    let tempC = tree.c.slice();
+    const tempN = tree.n;
+    const tempC = tree.c.slice();
     tree.n = parent;
-    tree.c = [ {n: tempN, c: tempC} ];
+    tree.c = [{ n: tempN, c: tempC }];
     return true;
   } else {
     for (const n of tree.c) {
@@ -48,14 +48,11 @@ function parseMap (map) {
   const parsedMap = {};
 
   let input = map;
-  let i =0;
   while (input.length > 0) {
-    i++;
-    console.log(i);
-    let orphans = [];
+    const orphans = [];
     input.forEach(pair => {
       let centre, orbit;
-      [centre, orbit] = pair.split(")");
+      [centre, orbit] = pair.split(')');
       // walk map and find elemen
       if (!insertIntoTree(parsedMap, centre, orbit)) {
         orphans.push(pair);
@@ -74,7 +71,7 @@ function showTree (tree, indent = 0) {
   });
 }
 
-function countOrbits(tree, depth = 0) {
+function countOrbits (tree, depth = 0) {
   let total = 0;
   total += depth;
   tree.c.forEach(n => {
@@ -83,6 +80,54 @@ function countOrbits(tree, depth = 0) {
   return total;
 }
 
-let tree = parseMap(inputOrbits);
-showTree(tree);
+const tree = parseMap(inputOrbits);
 console.log(countOrbits(tree));
+
+const santaSampleOrbit =
+`COM)B
+B)C
+C)D
+D)E
+E)F
+B)G
+G)H
+D)I
+E)J
+J)K
+K)L
+K)YOU
+I)SAN`.split('\n');
+
+function findPath (tree, node, path = []) {
+  if (tree.n === node) {
+    path.push(tree.n);
+    return true;
+  } else {
+    for (const n of tree.c) {
+      if (findPath(n, node, path)) {
+        path.push(tree.n);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+const santaPath = [];
+findPath(tree, 'SAN', santaPath);
+
+const youPath = [];
+findPath(tree, 'YOU', youPath);
+
+let theSame = false;
+do {
+  if (santaPath[santaPath.length - 1] === youPath[youPath.length - 1]) {
+    theSame = true;
+    santaPath.pop();
+    youPath.pop();
+  } else {
+    theSame = false;
+  }
+} while (theSame);
+
+console.log(youPath.length + santaPath.length - 2);
