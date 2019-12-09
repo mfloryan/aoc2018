@@ -1,7 +1,7 @@
 
 const assert = require('assert');
 
-function isValidPassword(password) {
+function isValidPassword (password) {
   const digits = password.toString().split('');
   if (digits.length != 6) return false;
   let isIncreasing = true;
