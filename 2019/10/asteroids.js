@@ -25,16 +25,20 @@ function drawMap (map, extraPoints = []) {
   console.log(rows.map(r => r.join('')).join('\n'));
 }
 
-function getVector (p1, p2) {
+function getVectorDirection (p1, p2) {
   return Math.atan2(p2.y - p1.y, p2.x - p1.x);
 }
 
+function getVectorMagnitude (p1, p2) {
+  return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+}
+
 function getBestAsteroid (map) {
-  const asteroids = map.flatMap((r, y) => r.map((a, x) => { return { x: x, y: y, a: a } ;})).filter(a => a.a === '#');
+  const asteroids = map.flatMap((r, y) => r.map((a, x) => { return { x: x, y: y, a: a }; })).filter(a => a.a === '#');
   const asteroidMap = asteroids.map(asteroid => {
     return {
       asteroid,
-      sees: new Set(asteroids.filter(a => !(a.x === asteroid.x && a.y === asteroid.y)).map(a => getVector(asteroid, a))).size
+      sees: new Set(asteroids.filter(a => !(a.x === asteroid.x && a.y === asteroid.y)).map(a => getVectorDirection(asteroid, a))).size
     };
   }).sort((a, b) => b.sees - a.sees);
   return asteroidMap[0];
@@ -109,4 +113,61 @@ const map6 = `.#..##.###...#######
 ###.##.####.##.#..##`;
 assert.strictEqual(getBestAsteroid(parseMap(map6)).sees, 210);
 
-console.log(getBestAsteroid(parseMap(input)).sees);
+let mapB = `.#....#####...#..
+##...##.#####..##
+##...#...#.#####.
+..#.........###..
+..#.#.....#....##`;
+
+let mapForPartTwo = parseMap(input);
+let station = getBestAsteroid(mapForPartTwo);
+
+drawMap(mapForPartTwo);
+
+console.log(station);
+
+let pos = station.asteroid;
+
+function getAsteroids(map) {
+  return map.flatMap((r, y) => r.map((a, x) => { return { x: x, y: y, a: a }; })).filter(a => a.a === '#');
+}
+
+let asteroids = getAsteroids(mapForPartTwo)
+  .map(a => {
+    const dir = getVectorDirection(pos, a);
+    return {
+      x: a.x,
+      y: a.y,
+      d: dir < -(Math.PI / 2) ? dir + 2 * Math.PI : dir,
+      m: getVectorMagnitude(pos, a)
+    };
+  }).filter(a => !(a.x === pos.x && a.y === pos.y));
+
+asteroids.sort((a, b) => (a.d === b.d) ? (a.m - b.m) : (a.d - b.d));
+
+console.log(asteroids);
+
+function vaporiseAsteroidsOnce(asteroids) {
+  let index = 0;
+  let previousAsteroids = asteroids;
+  let newAsteroids;
+  do {
+    newAsteroids = [];
+    let lastD;
+    for (let i = 0; i < previousAsteroids.length; i++) {
+      const element = previousAsteroids[i];
+      if (element.d === lastD) {
+        newAsteroids.push(element);
+      } else {
+        index++;
+        if ([1, 2, 3, 10, 20, 50, 100, 199, 200, 201, 299].some(i => i === index)) {
+          console.log(`${index.toString().padStart(3)} - [${element.x},${element.y}]`);
+        }
+      }
+      lastD = element.d;
+    }
+    previousAsteroids = newAsteroids;
+  } while (newAsteroids.length > 0);
+}
+
+vaporiseAsteroidsOnce(asteroids);
