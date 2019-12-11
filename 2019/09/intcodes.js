@@ -13,8 +13,6 @@ const day9InputCode = [1102,34463338,34463338,63,1007,63,34463338,63,1005,63,
 class Cpu {
 
   getParameterMode(opcode, parameterIndex) {
-    // console.log(`${opcode} -> index ${parameterIndex}`);
-    // console.log(`${Math.round((opcode / Math.pow(10, parameterIndex+1)) % 10)}`);
     return Math.round((opcode / Math.pow(10, parameterIndex+1)) % 10);
   }
 
@@ -46,13 +44,17 @@ class Cpu {
       this.pc += 4;
     },
     3: function input() {
+      if (this.input.length < 1) {
+        return false;
+      }
+      let input = this.input.shift();
+
       let writeOffset = this.getParameterMode(this.memory[this.pc], 1)==2? this.relativeBase : 0;
-      this.memory[this.memory[this.pc+1] + writeOffset] = this.input;
+      this.memory[this.memory[this.pc+1] + writeOffset] =  input;
       this.pc += 2;
     },
     4: function output() {
-      this.output = this.getParameterValue(1);
-      console.log(this.output);
+      this.output.push(this.getParameterValue(1));
       this.pc += 2;
     },
     5: function jump_if_true() {
@@ -93,32 +95,31 @@ class Cpu {
     }
   };
 
-  constructor (memory) {
-    this.memory = memory.slice().concat(new Array(10000).fill(0));
-    this.pc = 0;
-    this.input = 0;
-    this.output = 0;
-    this.relativeBase = 0;
+  constructor (code) {
+    this.memory = code.slice().concat(new Array(10000).fill(0));
+    this.reset();
   }
 
    run () {
-     console.log();
-    this.pc = 0;
     while (this.memory[this.pc] !== 99) {
-      // console.log(`PC: ${this.pc}`);
-      // console.log(this.memory.map((m,i) => m.toString().padStart(5,this.pc == i?'.':' ')).join("|"));
 
       let opcodeValue = this.memory[this.pc] % 100;
       const op = this.opcodes[opcodeValue];
 
       if (op) {
-        // console.log(op);
         op.apply(this);
       } else {
         console.log("Unknown opcode: " + op);
         break;
       }
     }
+  }
+
+  reset() {
+    this.pc = 0;
+    this.input = [];
+    this.output = [];
+    this.relativeBase = 0;
   }
 
   getMemory(address) {
@@ -129,8 +130,8 @@ class Cpu {
     this.memory[address] = value;
   }
 
-  setInput(value) {
-    this.input = value;
+  addInput(value) {
+    this.input.push(value);
   }
 
   getOutput() {
@@ -139,92 +140,98 @@ class Cpu {
 
 };
 
-// let cpu1 = new Cpu(sampleCode);
-// cpu1.run();
-// assert.strictEqual(cpu1.getMemory(0), 3500);
+let cpu1 = new Cpu(sampleCode);
+cpu1.run();
+assert.strictEqual(cpu1.getMemory(0), 3500);
 
-// let cpu2 = new Cpu(day2InputCode);
-// cpu2.setMemory(1, 12);
-// cpu2.setMemory(2, 2);
-// cpu2.run();
-// assert.strictEqual(cpu2.getMemory(0), 4138658);
-
-
-// let cpu3 = new Cpu([3,0,4,0,99]);
-// cpu3.setInput(30);
-// cpu3.run();
-// assert.strictEqual(cpu3.getOutput(), 30);
-
-// let cpu4 = new Cpu([1002,4,3,4,33]);
-// cpu4.run();
-
-// let cpu5 = new Cpu(day5InputCode);
-// cpu5.setInput(1);
-// cpu5.run();
-// console.log(cpu5.getOutput());
-// assert.strictEqual(cpu5.getOutput(), 3122865);
-
-// let cpu6 = new Cpu([3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9]);
-// cpu6.setInput(0);
-// cpu6.run();
-// assert.strictEqual(cpu6.getOutput(), 0)
-
-// cpu6.setInput(2);
-// cpu6.run();
-// assert.strictEqual(cpu6.getOutput(), 1);
-
-// let cpu7 = new Cpu([3,3,1105,-1,9,1101,0,0,12,4,12,99,1]);
-// cpu7.setInput(0);
-// cpu7.run();
-// assert.strictEqual(cpu7.getOutput(), 0)
-
-// cpu7.setInput(2);
-// cpu7.run();
-// // assert.strictEqual(cpu7.getOutput(), 1);
-
-// let cpu8 = new Cpu([3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,
-//   1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,
-//   999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99]);
-
-// cpu8.setInput(6);
-// cpu8.run();
-// assert.strictEqual(cpu8.getOutput(),999);
-
-// cpu8.setInput(8);
-// cpu8.run();
-// assert.strictEqual(cpu8.getOutput(),1000);
-
-// cpu8.setInput(10);
-// cpu8.run();
-// assert.strictEqual(cpu8.getOutput(),1001);
-
-// let cpuPartTwp = new Cpu(day5InputCode);
-// cpuPartTwp.setInput(5);
-// cpuPartTwp.run();
-// console.log(cpuPartTwp.getOutput());
+let cpu2 = new Cpu(day2InputCode);
+cpu2.setMemory(1, 12);
+cpu2.setMemory(2, 2);
+cpu2.run();
+assert.strictEqual(cpu2.getMemory(0), 4138658);
 
 
+let cpu3 = new Cpu([3,0,4,0,99]);
+cpu3.addInput(30);
+cpu3.run();
+assert.strictEqual(cpu3.getOutput()[0], 30);
 
-let cpu9 = new Cpu([109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99]);
+let cpu4 = new Cpu([1002,4,3,4,33]);
+cpu4.run();
+
+let cpu5 = new Cpu(day5InputCode);
+cpu5.addInput(1);
+cpu5.run();
+let day5_part1_result = cpu5.getOutput().pop();
+assert.strictEqual(day5_part1_result, 3122865);
+
+let day5_part2_ex5 = new Cpu([3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9]);
+day5_part2_ex5.addInput(0);
+day5_part2_ex5.run();
+assert.strictEqual(day5_part2_ex5.getOutput()[0], 0)
+
+day5_part2_ex5.reset();
+
+day5_part2_ex5.addInput(2);
+day5_part2_ex5.run();
+assert.strictEqual(day5_part2_ex5.getOutput()[0], 1);
+
+let cpu7 = new Cpu([3,3,1105,-1,9,1101,0,0,12,4,12,99,1]);
+cpu7.addInput(0);
+cpu7.run();
+assert.strictEqual(cpu7.getOutput()[0], 0)
+
+cpu7 = new Cpu([3,3,1105,-1,9,1101,0,0,12,4,12,99,1]);
+cpu7.addInput(2);
+cpu7.run();
+assert.strictEqual(cpu7.getOutput()[0], 1);
+
+let cpu8 = new Cpu([3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,
+  1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,
+  999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99]);
+
+cpu8.addInput(6);
+cpu8.run();
+assert.strictEqual(cpu8.getOutput()[0],999);
+
+cpu8.reset();
+
+cpu8.addInput(8);
+cpu8.run();
+assert.strictEqual(cpu8.getOutput()[0],1000);
+
+cpu8.reset();
+
+cpu8.addInput(10);
+cpu8.run();
+assert.strictEqual(cpu8.getOutput()[0],1001);
+
+let cpuPartTwo = new Cpu(day5InputCode);
+cpuPartTwo.addInput(5);
+cpuPartTwo.run();
+assert.strictEqual(cpuPartTwo.getOutput()[0],773660);
+
+let quine = [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99];
+let cpu9 = new Cpu(quine);
 cpu9.run();
-console.log(cpu9.output);
+assert.deepStrictEqual(cpu9.getOutput(), quine);
 
 let cpuA = new Cpu([1102,34915192,34915192,7,4,7,99,0]);
 cpuA.run();
-console.log(cpuA.getOutput());
+assert.strictEqual(cpuA.getOutput()[0], 1219070632396864);
 
 let cpuB = new Cpu([104,1125899906842624,99]);
 cpuB.run();
-console.log(cpuB.getOutput());
-
+assert.strictEqual(cpuB.getOutput()[0],1125899906842624);
 
 let cpuDay9 = new Cpu(day9InputCode);
-cpuDay9.setInput(1);
+cpuDay9.addInput(1);
 cpuDay9.run();
-console.log(cpuDay9.getOutput());
-
+console.log(cpuDay9.getOutput()[0]);
+assert.strictEqual(cpuDay9.getOutput()[0], 2350741403);
 
 let cpuDay92 = new Cpu(day9InputCode);
-cpuDay92.setInput(2);
+cpuDay92.addInput(2);
 cpuDay92.run();
-console.log(cpuDay92.getOutput());
+console.log(cpuDay92.getOutput()[0]);
+assert.strictEqual(cpuDay92.getOutput().shift(), 53088);
