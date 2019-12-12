@@ -38,10 +38,28 @@ function parseImageData (imageData, dimentions) {
 
 const image = parseImageData(input, { w: 25, h: 6 });
 
-const x = image.map((layer, i) => { return { i: i, c: layer.map(r => r.filter(p => p === '0').length).reduce((p, c) => p + c) }}).sort((a,b) => (a.c - b.c));
+const x = image.map((layer, i) => { return { i: i, c: layer.map(r => r.filter(p => p === '0').length).reduce((p, c) => p + c) } ;}).sort((a, b) => (a.c - b.c));
 
-let pickedLayer = image[x[0].i];
-let ones = pickedLayer.map(r => r.filter(p => p === '1').length).reduce((p, c) => p + c);
-let twos = pickedLayer.map(r => r.filter(p => p === '2').length).reduce((p, c) => p + c);
+const pickedLayer = image[x[0].i];
+const ones = pickedLayer.map(r => r.filter(p => p === '1').length).reduce((p, c) => p + c);
+const twos = pickedLayer.map(r => r.filter(p => p === '2').length).reduce((p, c) => p + c);
 console.log(ones * twos);
 
+function renderImage (image) {
+  const finalImage = [];
+
+  for (let x = 0; x < image[0].length; x++) {
+    const newRow = [];
+    const row = image[0][x];
+    for (let y = 0; y < row.length; y++) {
+      const collectedLayers = image.map(i => i[x][y]).reduce((p, c) => p === '2' ? c : p, '2');
+      newRow.push(collectedLayers);
+    }
+    finalImage.push(newRow);
+  }
+  return finalImage;
+}
+
+const finalImage = renderImage(image);
+
+console.log(finalImage.map(r => r.map(p => p === '0' ? ' ' : '■').join('')).join('\n'));
