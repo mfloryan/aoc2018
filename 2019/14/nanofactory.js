@@ -72,9 +72,9 @@ function countNeeds (root, needs, requiredQuantityFromTop = 1, level = 0) {
   });
 }
 
-function getRequiredOre (fuel) {
+function getRequiredOre (fuel, required = 1) {
   const needs = {};
-  countNeeds(fuel, needs);
+  countNeeds(fuel, needs, required);
   return needs.ORE;
 }
 
@@ -109,3 +109,18 @@ assert.strictEqual(getRequiredOre(buildTree(parseInput(exampleInput1))), 31);
 assert.strictEqual(getRequiredOre(buildTree(parseInput(exampleInput2))), 165);
 assert.strictEqual(getRequiredOre(buildTree(parseInput(exampleInput3))), 13312);
 console.log(getRequiredOre(buildTree(parseInput(input))));
+
+console.log(1000000000000);
+console.log();
+
+let tree = buildTree(parseInput(input));
+
+let i = 4800000;
+let result = 0;
+while (result < 1000000000000) {
+  i++;
+  if (i % 10000 === 0) console.log(result.toString().padStart(13), i);
+  result = getRequiredOre(tree, i);
+}
+console.log(result);
+console.log(i - 1);
