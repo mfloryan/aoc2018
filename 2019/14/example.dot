@@ -1,0 +1,13 @@
+digraph factory {
+  ORE -> A [taillabel="10" headlabel="10"]
+  ORE -> B [taillabel="1" headlabel="1"]
+  A -> C [taillabel="7" headlabel="1"]
+  B -> C [taillabel="1" headlabel="1"]
+  A -> D [taillabel="7" headlabel="1"]
+  C -> D [taillabel="1" headlabel="1"]
+  A -> E [taillabel="7" headlabel="1"]
+  D -> E [taillabel="1" headlabel="1"]
+  A -> FUEL [taillabel="7" headlabel="1"]
+  E -> FUEL [taillabel="1" headlabel="1"]
+}
+
