@@ -129,4 +129,8 @@ module.exports = class Cpu {
     return this.output;
   }
 
+  clearOutput() {
+    this.output = [];
+  }
+
 };
