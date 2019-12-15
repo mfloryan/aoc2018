@@ -33,32 +33,32 @@ function drawMap (map) {
   console.log(picture.map(r => r.join('')).join('\n'));
 }
 
-function positionPredicate(position) {
+function positionPredicate (position) {
   return mapPoint => mapPoint.p[0] === position[0] && mapPoint.p[1] === position[1];
 }
 
-let positionShift = {
+const positionShift = {
   1: [0, -1],
   2: [0, 1],
   3: [1, 0],
   4: [-1, 0]
 };
 
-function applyMove(position, move) {
+function applyMove (position, move) {
   return position.map((p, i) => p + positionShift[move][i]);
 }
 
-let oppositeMove = {
+const oppositeMove = {
   1: 2,
   3: 4,
   2: 1,
   4: 3
-}
+};
 
-let droid = new Cpu(code);
+const droid = new Cpu(code);
 
-function discoverRandom(droid) {
-  let mapOfTheWorld = [];
+function discoverRandom (droid) {
+  const mapOfTheWorld = [];
   let position = [0, 0];
   let nextMove = 1;
   let done = false;
@@ -97,25 +97,24 @@ function discoverRandom(droid) {
   return mapOfTheWorld;
 }
 
-function moveDroid(droid, direction) {
+function moveDroid (droid, direction) {
   droid.addInput(direction);
   droid.run();
   return droid.getOutput().shift();
 }
 
-function discoverMaze(droid) {
-  let mapOfTheWorld = [];
+function discoverMaze (droid) {
+  const mapOfTheWorld = [];
   let position = [0, 0];
-  let discovered = [];
-  let moveOptions = [1, 2, 3, 4];
+  const moveOptions = [1, 2, 3, 4];
 
   function move (direction, path = [], level = 0) {
-    // console.log(''.padStart(level), direction, level, position);
     path.push(direction);
 
     const result = moveDroid(droid, direction);
 
     if (result === 0) {
+      mapOfTheWorld.push({ p: applyMove(position, direction), t: '#' });
       path.pop();
       return false;
     }
@@ -123,26 +122,29 @@ function discoverMaze(droid) {
     position = applyMove(position, direction);
 
     if (result === 2) {
+      mapOfTheWorld.push({ p: position, t: 'o' });
       console.log('Found Oxygen');
       console.log(path.length);
-      return true;
+      // return true;
+    } else {
+      mapOfTheWorld.push({ p: position, t: '.' });
     }
 
     for (let i = 0; i < moveOptions.length; i++) {
       const moveOption = moveOptions[i];
-      // console.log(direction, moveOption, oppositeMove[direction]);
       if (oppositeMove[direction] !== moveOption) {
-        let result = move(moveOption, path.slice(), level + 1);
+        const result = move(moveOption, path.slice(), level + 1);
         if (result === true) return true;
       }
     };
 
-    let result2 = moveDroid(droid, oppositeMove[direction]);
+    moveDroid(droid, oppositeMove[direction]);
     position = applyMove(position, oppositeMove[direction]);
-    // console.log(''.padStart(level), 'move back', oppositeMove[direction], 'r:', result2);
   }
 
-  move(1);
+  mapOfTheWorld.push({ p: position, t: '.' });
+
+  move(1) || move(2) || move(3) || move(4);
 
   return mapOfTheWorld;
 }
@@ -150,6 +152,32 @@ function discoverMaze(droid) {
 // let mapOfTheWorld = discoverRandom(droid);
 // let mapOfTheWorld = discoverUsingBFS(droid);
 
-let mapOfTheWorld = discoverMaze(droid);
+const mapOfTheWorld = discoverMaze(droid);
 
-// drawMap(mapOfTheWorld);
+drawMap(mapOfTheWorld);
+
+function fillWithOxygene (mapOfTheWorld) {
+  let t = 0;
+  let noMoreToFill = false;
+  do {
+    const startPoints = mapOfTheWorld.filter(m => m.t === 'o');
+    if (startPoints.length === 0) noMoreToFill = true;
+
+    const oxygeneFlow = startPoints
+      .flatMap(sp => Object.values(positionShift).map(p => [p[0] + sp.p[0], p[1] + sp.p[1]]))
+      .filter(p => {
+        const pointOnMap = mapOfTheWorld.find(m => m.p[0] === p[0] && m.p[1] === p[1]);
+        return pointOnMap && pointOnMap.t === '.';
+      });
+    oxygeneFlow.forEach(p => {
+      const pointOnMap = mapOfTheWorld.find(m => m.p[0] === p[0] && m.p[1] === p[1]);
+      pointOnMap.t = 'o';
+    });
+
+    startPoints.forEach(sp => (sp.t = 'O'));
+    t++;
+  } while (!noMoreToFill);
+  console.log(t - 2);
+};
+
+fillWithOxygene(mapOfTheWorld);
