@@ -37,14 +37,6 @@ function positionPredicate(position) {
   return mapPoint => mapPoint.p[0] === position[0] && mapPoint.p[1] === position[1];
 }
 
-function applyMove(position, move) {
-  return position.map((p, i) => p + positionShift[move][i]);
-}
-
-let droid = new Cpu(code);
-
-let mapOfTheWorld = [];
-let position = [0, 0];
 let positionShift = {
   1: [0, -1],
   2: [0, 1],
@@ -52,46 +44,112 @@ let positionShift = {
   4: [-1, 0]
 };
 
-let nextMove = 1;
+function applyMove(position, move) {
+  return position.map((p, i) => p + positionShift[move][i]);
+}
 
-let done = false;
-let i = 0;
-do {
-  i++;
+let oppositeMove = {
+  1: 2,
+  3: 4,
+  2: 1,
+  4: 3
+}
 
-  droid.addInput(nextMove);
+let droid = new Cpu(code);
+
+function discoverRandom(droid) {
+  let mapOfTheWorld = [];
+  let position = [0, 0];
+  let nextMove = 1;
+  let done = false;
+  do {
+    droid.addInput(nextMove);
+    droid.run();
+    const result = droid.getOutput().shift();
+    const newPosition = applyMove(position, nextMove);
+
+    if (result === 0) {
+      if (!mapOfTheWorld.some(positionPredicate(newPosition))) {
+        mapOfTheWorld.push({ p: newPosition, t: '#' });
+      }
+    } else {
+      if (!mapOfTheWorld.some(positionPredicate(newPosition))) {
+        mapOfTheWorld.push({ p: newPosition, t: result === 1 ? '.' : 'o' });
+      }
+      position = newPosition;
+      if (result === 2) {
+        done = true;
+        console.log(position);
+      }
+    }
+
+    let goodNextMove;
+    do {
+      goodNextMove = true;
+      nextMove = Math.floor(Math.random() * 4) + 1;
+      const nextPosition = applyMove(position, nextMove);
+      const mapKnown = mapOfTheWorld.find(positionPredicate(nextPosition));
+      if (mapKnown) {
+        if (mapKnown.t === '#') goodNextMove = false;
+      }
+    } while (!goodNextMove);
+  } while (!done);
+  return mapOfTheWorld;
+}
+
+function moveDroid(droid, direction) {
+  droid.addInput(direction);
   droid.run();
-  const result = droid.getOutput().shift();
-  const newPosition = applyMove(position, nextMove);
+  return droid.getOutput().shift();
+}
 
-  if (result === 0) {
-    if (!mapOfTheWorld.some(positionPredicate(newPosition))) {
-      mapOfTheWorld.push({ p: newPosition, t: '#' });
+function discoverMaze(droid) {
+  let mapOfTheWorld = [];
+  let position = [0, 0];
+  let discovered = [];
+  let moveOptions = [1, 2, 3, 4];
+
+  function move (direction, path = [], level = 0) {
+    // console.log(''.padStart(level), direction, level, position);
+    path.push(direction);
+
+    const result = moveDroid(droid, direction);
+
+    if (result === 0) {
+      path.pop();
+      return false;
     }
-  } else {
-    if (!mapOfTheWorld.some(positionPredicate(newPosition))) {
-      mapOfTheWorld.push({ p: newPosition, t: '.' });
-    }
-    position = newPosition;
+
+    position = applyMove(position, direction);
+
     if (result === 2) {
-      done = true;
-      console.log(position);
+      console.log('Found Oxygen');
+      console.log(path.length);
+      return true;
     }
+
+    for (let i = 0; i < moveOptions.length; i++) {
+      const moveOption = moveOptions[i];
+      // console.log(direction, moveOption, oppositeMove[direction]);
+      if (oppositeMove[direction] !== moveOption) {
+        let result = move(moveOption, path.slice(), level + 1);
+        if (result === true) return true;
+      }
+    };
+
+    let result2 = moveDroid(droid, oppositeMove[direction]);
+    position = applyMove(position, oppositeMove[direction]);
+    // console.log(''.padStart(level), 'move back', oppositeMove[direction], 'r:', result2);
   }
 
-  let goodNextMove;
-  do {
-    goodNextMove = true;
-    nextMove = Math.floor(Math.random() * 4) + 1;
-    let nextPosition = applyMove(position, nextMove);
-    let mapKnown = mapOfTheWorld.find(positionPredicate(nextPosition));
-    if (mapKnown) {
-      if (mapKnown.t === '#') goodNextMove = false;
-    }
-  } while (!goodNextMove);
+  move(1);
 
-  // if (i > 1000) done = true;
-} while (!done);
+  return mapOfTheWorld;
+}
 
-drawMap(mapOfTheWorld);
-console.log(position);
+// let mapOfTheWorld = discoverRandom(droid);
+// let mapOfTheWorld = discoverUsingBFS(droid);
+
+let mapOfTheWorld = discoverMaze(droid);
+
+// drawMap(mapOfTheWorld);
