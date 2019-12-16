@@ -70,7 +70,6 @@ function findOriginalState (moons) {
   let step = 0;
   do {
     step++;
-    if (step % 100000000 === 0) console.log(`${step.toString().padStart(15)} - ${new Date()}`);
     applyStepChange(moons);
   } while (!sameState(moons, originalMoons));
 
@@ -83,7 +82,6 @@ function findCycleForCoordinate(moons, coordinate) {
   let step = 0;
   do {
     step++;
-    if (step % 100000000 === 0) console.log(`${step.toString().padStart(15)} - ${new Date()}`);
     applyStepChange(moons);
   } while (!sameState2(moons, originalMoons, coordinate));
 
@@ -114,21 +112,19 @@ const input = `<x=1, y=3, z=-11>
 <x=12, y=-4, z=-4>`;
 
 const inputMoons = parseMoons(input.split('\n'));
-
 console.log(calculateEnergy(inputMoons, 1000));
-// console.log(findOriginalState(inputMoons));
 
-let xCycle = findCycleForCoordinate(inputMoons,(m) => m.x);
-let yCycle = findCycleForCoordinate(inputMoons,(m) => m.y);
-let zCycle = findCycleForCoordinate(inputMoons,(m) => m.z);
-
-function denominator(a, b) {
+function denominator (a, b) {
   return b === 0 ? a : denominator(b, a % b);
 }
 
-function multiplier(a, b) {
-  return (a * b) / denominator(a,b);
+function multiplier (a, b) {
+  return (a * b) / denominator(a, b);
 }
+
+let xCycle = findCycleForCoordinate(inputMoons, (m) => m.x);
+let yCycle = findCycleForCoordinate(inputMoons, (m) => m.y);
+let zCycle = findCycleForCoordinate(inputMoons, (m) => m.z);
 
 console.log(xCycle, yCycle, zCycle);
 console.log(multiplier(multiplier(xCycle, yCycle), zCycle));
