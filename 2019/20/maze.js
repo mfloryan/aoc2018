@@ -40,34 +40,39 @@ function parseMaze (maze) {
 function getNextSteps(map, location) {
   const vicinity = [{ x: -1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }];
   let aroundLocation = vicinity.map(vp => {return {x: vp.x + location.x, y: vp.y + location.y};});
-  return map.filter(mp => aroundLocation.some(al => (mp.x === al.x && mp.y === al.y)));
+  let directNextSteps = map.filter(mp => aroundLocation.some(al => (mp.x === al.x && mp.y === al.y)));
+  if (location.label && location.label !== 'ZZ') {
+    let otherSide = map.find(ml => (ml.label === location.label) && !(ml.x === location.x && ml.y === location.y));
+    if (otherSide) {
+      directNextSteps.push(otherSide);
+    }
+  }
+  // let portalLocations = directNextSteps.filter(dns => dns.label && dns.label !== 'ZZ' && !dns.visited);
+  // let portalNextSteps = portalLocations.map(pl => ));
+  return directNextSteps;
 }
 
-function findShortestPath(inputMap) {
-  let map = JSON.parse(JSON.stringify(inputMap));
-  let start = map.find(mp => mp.label === 'AA');
-  let end = map.find(mp => mp.label === 'ZZ');
+function findShortestPath (inputMap) {
+  const map = JSON.parse(JSON.stringify(inputMap));
+  const start = map.find(mp => mp.label === 'AA');
 
-  let i = 0;
-  let queue = [];
+  const queue = [];
   start.visited = true;
   queue.push(start);
   while (queue.length > 0) {
-    i++;
     const location = queue.shift();
     // console.log(location);
     if (location.label === 'ZZ') {
       return location;
     }
 
-    let nextSteps = getNextSteps(map, location).filter(p => !(p.visited && p.visited === true));
+    const nextSteps = getNextSteps(map, location).filter(p => !(p.visited && p.visited === true));
     // console.log(nextSteps);
     nextSteps.forEach(ns => {
       ns.visited = true;
       ns.parent = location;
       queue.push(ns);
     });
-    // if (i > 5) break;
   }
 }
 
@@ -75,13 +80,14 @@ function countPathLength(finalNode) {
   let node = finalNode;
   let length = 0;
   while (node.parent) {
+    // console.log(`[${node.x},${node.y}] - ${node.label}`);
     length++;
     node = node.parent;
   }
   return length;
 }
 
-const map = parseMaze(getInput('example1'));
+const map = parseMaze(getInput('input'));
 const shortestPath = countPathLength(findShortestPath(map));
 
 console.log(shortestPath);
