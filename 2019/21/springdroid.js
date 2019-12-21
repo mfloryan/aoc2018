@@ -25,3 +25,23 @@ droid.clearOutput();
 droid.run();
 console.log(droid.getOutput().map(x => String.fromCharCode(x)).join(''));
 console.log(droid.getOutput().pop());
+
+droid = new Cpu(code);
+
+springscript = `OR A J
+AND B J
+AND C J
+NOT J J
+AND D J
+OR E T
+OR H T
+AND T J
+RUN
+`;
+
+springscript.split('').map(c => c.charCodeAt(0)).forEach(n => droid.addInput(n));
+droid.clearOutput();
+
+droid.run();
+console.log(droid.getOutput().map(x => String.fromCharCode(x)).join(''));
+console.log(droid.getOutput().pop());
