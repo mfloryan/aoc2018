@@ -14,6 +14,14 @@ function parseMaze (maze) {
     .flatMap((r, y) => r.map((c, x) => { return { x, y, c }; }));
 
   mazeMap = parsedMaze.filter(p => p.c === '.');
+  const dim = mazeMap.reduce((p, c) => {
+    return {
+      minX: Math.min(c.x, p.minX),
+      maxX: Math.max(c.x, p.maxX),
+      minY: Math.min(c.y, p.minY),
+      maxY: Math.max(c.y, p.maxY)
+    };
+  }, { minX: 0, maxX: 0, minY: 0, maxY: 0 });
 
   const letters = parsedMaze.filter(mp => mp.c.charCodeAt(0) >= 'A'.charCodeAt(0) && mp.c.charCodeAt(0) <= 'Z'.charCodeAt(0));
   const labelLocation = [
@@ -31,24 +39,25 @@ function parseMaze (maze) {
       }).join('');
       return possibleLabels;
     }).filter(l => l.length === 2);
-    if (x.length === 1) p.label = x[0];
+    if (x.length === 1) {
+      p.label = x[0];
+      p.isOutside = (p.x - 2 === dim.minX || p.x === dim.maxX || p.y - 2 === dim.minY || p.y === dim.maxY);
+    }
   });
 
   return mazeMap;
 }
 
-function getNextSteps(map, location) {
+function getNextSteps (map, location) {
   const vicinity = [{ x: -1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }];
-  let aroundLocation = vicinity.map(vp => {return {x: vp.x + location.x, y: vp.y + location.y};});
-  let directNextSteps = map.filter(mp => aroundLocation.some(al => (mp.x === al.x && mp.y === al.y)));
+  const aroundLocation = vicinity.map(vp => { return { x: vp.x + location.x, y: vp.y + location.y }; });
+  const directNextSteps = map.filter(mp => aroundLocation.some(al => (mp.x === al.x && mp.y === al.y)));
   if (location.label && location.label !== 'ZZ') {
-    let otherSide = map.find(ml => (ml.label === location.label) && !(ml.x === location.x && ml.y === location.y));
+    const otherSide = map.find(ml => (ml.label === location.label) && !(ml.x === location.x && ml.y === location.y));
     if (otherSide) {
       directNextSteps.push(otherSide);
     }
   }
-  // let portalLocations = directNextSteps.filter(dns => dns.label && dns.label !== 'ZZ' && !dns.visited);
-  // let portalNextSteps = portalLocations.map(pl => ));
   return directNextSteps;
 }
 
@@ -76,18 +85,85 @@ function findShortestPath (inputMap) {
   }
 }
 
-function countPathLength(finalNode) {
+function getNextStepsRecursive (map, location) {
+  const vicinity = [{ x: -1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }];
+  const aroundLocation = vicinity.map(vp => { return { x: vp.x + location.x, y: vp.y + location.y }; });
+  const directNextSteps = map.filter(mp => aroundLocation.some(al => (mp.x === al.x && mp.y === al.y)));
+  directNextSteps.forEach(ns => { ns.z = location.z; });
+  if (location.label && location.label !== 'ZZ') {
+    if (!(location.z === 0 && location.isOutside === true)) {
+      const otherSide = map.find(ml => (ml.label === location.label) && !(ml.x === location.x && ml.y === location.y));
+      if (otherSide) {
+        otherSide.z = otherSide.isOutside ? location.z + 1 : location.z - 1;
+        directNextSteps.push(otherSide);
+      }
+    }
+  }
+  return directNextSteps;
+}
+
+function locationEquality(a, b) {
+  return b => (a.x === b.x && a.y === b.y && a.z === b.z);
+}
+
+function findShortestPathRecusrive (inputMap) {
+  const map = JSON.parse(JSON.stringify(inputMap));
+  const start = map.find(mp => mp.label === 'AA');
+  const visited = [];
+
+  const queue = [];
+  start.path = [];
+  start.z = 0;
+  visited.push(start);
+  queue.push(start);
+
+  let i = 0;
+  while (queue.length > 0) {
+    i++;
+    const location = queue.shift();
+    // console.log(`[${location.x},${location.y},${location.z}]`.padStart(14), location.label || '');
+
+    if (location.z === 0 && location.label === 'ZZ') {
+      return location;
+    }
+
+    const nextSteps = getNextStepsRecursive(map, location).filter(p => !(visited.some(locationEquality(p)))).filter(p => p.z < 19);
+    // console.log('ns', nextSteps);
+    nextSteps.forEach(ns => {
+      ns.path = location.path.slice();
+      ns.path.push({ x: location.x, y: location.y, z: location.z, label: location.label });
+      visited.push({ x: ns.x, y: ns.y, z: ns.z });
+      queue.push(ns);
+    });
+
+    // if (i === 800) break;
+  }
+}
+
+function countPathLength (finalNode) {
   let node = finalNode;
   let length = 0;
   while (node.parent) {
-    // console.log(`[${node.x},${node.y}] - ${node.label}`);
+    console.log(`[${node.x},${node.y}] - ${node.label}`);
     length++;
     node = node.parent;
   }
   return length;
 }
 
-const map = parseMaze(getInput('input'));
-const shortestPath = countPathLength(findShortestPath(map));
+function countPathLengthRecursive (finalNode) {
+  return finalNode.path.length;
+}
 
-console.log(shortestPath);
+// console.log(countPathLength(findShortestPath(parseMaze(getInput('input')))));
+// console.log(countPathLength(findShortestPath(parseMaze(getInput('example3')))));
+
+const map = parseMaze(getInput('example3'));
+const foundPath = findShortestPathRecusrive(map);
+if (foundPath) {
+  console.log(foundPath.path.filter(p => p.label));
+  const shortestPath = countPathLengthRecursive(foundPath);
+  console.log(shortestPath);
+} else {
+  console.log('Path not found. ☹️');
+}
