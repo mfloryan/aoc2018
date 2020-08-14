@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/mfloryan/aoc2018#readme",
   "dependencies": {
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.19"
   },
   "devDependencies": {
     "mocha": "^5.2.0"
